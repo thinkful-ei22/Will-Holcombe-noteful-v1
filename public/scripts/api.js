@@ -7,7 +7,7 @@ const api = {
   search: function (query) {
     return $.ajax({
       type: 'GET',
-      url: '/api/notes/',
+      url: '/api/notes',
       dataType: 'json',
       data: query
     });

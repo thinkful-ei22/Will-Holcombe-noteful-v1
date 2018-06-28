@@ -14,22 +14,22 @@
         <script type="text/javascript" src="scripts/api.js"></script>
 
         <script>  
-       /* 
+        
        const noteObj1 = {title: ' Milange',
   content: 'Are you the one?'};
 const noteObj2 = {title: 'Morph',
 content: 'You talkin to me?'};
-        */
-                api.remove(1009)
+        
+                api.update(1000, noteObj1)
                 .then(response => {
                   console.log(response)
                 });
             
               // test get all with search term
-              api.remove(1008)
+              api.update(1009, noteObj2 )
                 .then(response => {
                   console.log(response)
-                }); </script>
+                });  </script>
 
 </body>
 </html>
