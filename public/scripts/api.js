@@ -3,6 +3,7 @@
 
 const api = {
 
+  
   search: function (query, callback) {
     $.ajax({
       type: 'GET',
@@ -12,6 +13,8 @@ const api = {
       success: callback
     });
   },
+ 
+  
 
   details: function (id, callback) {
     $.ajax({
