@@ -13,13 +13,20 @@
         crossorigin="anonymous"></script>
         <script type="text/javascript" src="scripts/api.js"></script>
 
-        <script>   api.search({})
+        <script>  
+       /* 
+       const noteObj1 = {title: ' Milange',
+  content: 'Are you the one?'};
+const noteObj2 = {title: 'Morph',
+content: 'You talkin to me?'};
+        */
+                api.remove(1009)
                 .then(response => {
                   console.log(response)
                 });
             
               // test get all with search term
-              api.search({searchTerm: 'cats'})
+              api.remove(1008)
                 .then(response => {
                   console.log(response)
                 }); </script>
