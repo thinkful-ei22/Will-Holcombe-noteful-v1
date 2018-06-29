@@ -187,13 +187,13 @@ describe('Noteful App', function() {
           expect(res.body.title).to.deep.equal(testObject.title);
           expect(res.body.content).to.deep.equal(testObject.content);
         });
-
     });
+    
 /*
     it('should respond with a 404 for an invalid id', function () {
       return chai.request(app)
         .get('/api/notes/dorf')
-        //.catch(err => err.response)
+        .catch(err => err.response)
         .then(function(res) {
           expect(res).to.have.status(404);
         });
@@ -217,8 +217,7 @@ describe('Noteful App', function() {
           expect(res.body).to.be.a('object');
           expect(res.body).to.include.keys('id', 'title', 'content');
           expect(res.body.id).to.not.equal(null);
-          // response should be deep equal to `newItem` from above if we assign
-          // `id` to it from `res.body.id`
+          expect(res).to.have.header('location');
           expect(res.body).to.deep.equal(
             Object.assign(newItem, { id: res.body.id })
           );
@@ -238,7 +237,7 @@ describe('Noteful App', function() {
         
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-        
+          expect(res.body.message).to.equal('Missing `title` in request body');
         });
     });
   });
@@ -267,6 +266,21 @@ describe('Noteful App', function() {
           expect(res.body).to.deep.equal(updateData);
         });
     });
+
+    it('should respond with a 404 for an invalid id', function () {
+      const updateItem = {
+        'title': 'What about dogs?!',
+        'content': 'woof woof'
+      };
+      return chai.request(app)
+        .put('/api/notes/DOESNOTEXIST')
+        .send(updateItem)
+        .catch(err => err.response)
+        .then(res => {
+          expect(res).to.have.status(404);
+        });
+    });
+
 
 
     it('should raise error if missing title', function() {
