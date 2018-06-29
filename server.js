@@ -33,9 +33,10 @@ app.use(express.json());
 app.use('/api', notesRouter);
 
 app.use(function (req, res, next) {
-  let err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
-  res.status(404).json({ message: 'Not Found' });
+  next(err);
+  // res.status(404).json({ message: 'Not Found' });  why didn't this work?
 });
 
 app.use(function (err, req, res, next) {
@@ -46,9 +47,11 @@ app.use(function (err, req, res, next) {
   });
 });
 
-
-app.listen(PORT, function () {
-  console.info(`Server listening on ${this.address().port}`);
-}).on('error', err => {
-  console.error(err);
-});
+if(require.main === module){
+  app.listen(PORT, function () {
+    console.info(`Server listening on ${this.address().port}`);
+  }).on('error', err => {
+    console.error(err);
+  });
+}
+module.exports = app;
