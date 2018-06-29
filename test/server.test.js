@@ -7,49 +7,70 @@ const chaiHttp = require('chai-http');
 const expect = chai.expect;
 
 chai.use(chaiHttp);
-describe('notes', function() {
+describe('Reality check', function () {
 
+  it('true should be true', function () {
+    expect(true).to.be.true;
+  });
+
+  it('2 + 2 should equal 4', function () {
+    expect(2 + 2).to.equal(4);
+  });
+
+});
+
+describe('Noteful App', function() {
+
+
+  let server;
   before(function() {
     return runServer();
   });
 
-  // although we only have one test module at the moment, we'll
-  // close our server at the end of these tests. Otherwise,
-  // if we add another test module that also has a `before` block
-  // that starts our server, it will cause an error because the
-  // server would still be running from the previous tests.
+  
   after(function() {
     return closeServer();
   });
 
-  // `chai.request.get` is an asynchronous operation. When
-  // using Mocha with async operations, we need to either
-  // return an ES6 promise or else pass a `done` callback to the
-  // test that we call at the end. We prefer the first approach, so
-  // we just return the chained `chai.request.get` object.
-  /*
-  it('should return index page on GET', function() {
-    return chai.request(app)
-      .get('/')
-      .then(function(res) {
-        expect(res).to.equal(./index.html);
-        
-        });
-      });
- 
-*/
+  
   describe('404 handler', function() {
 
     it('should return a 404 status code for bad path', function() {
       return chai.request(app)
-        .get('/api/1005')
-
+        .get('/bad/path')
+        .catch(err => err.response)
 
         .then(function(res) {
           expect(res).to.have.status(404);
-          // expect(res).message.to.deep.equal(`Missing 'title' in request body`);
+          
+        });
 
-          expect(res).to.be.json;
+    });
+  });
+
+  describe('Static Server', function() {
+
+    it('GET request "/" should return the index page', function () {
+      return chai.request(app)
+        .get('/')
+        .then(function (res) {
+          expect(res).to.exist;
+          expect(res).to.have.status(200);
+          expect(res).to.be.html;
+        });
+    });
+
+  
+
+    it('should return a 404 status code for bad path', function() {
+      return chai.request(app)
+        .get('/')
+
+
+        .then(function(res) {
+          console.log(res.body);
+
+          expect(res).to.be.html;
           expect(res.body).to.be.a('object');
 
         });
@@ -59,14 +80,15 @@ describe('notes', function() {
 
   describe('GET /api/notes endpoint', function() {
 
-    it('should list notes on GET', function() {
+    it('should list 10 notes on GET on default and'
+    + ' return list with correct fields', function() {
       return chai.request(app)
         .get('/api/notes')
         .then(function(res) {
           expect(res).to.have.status(200);
           expect(res).to.be.json;
           expect(res.body).to.be.a('array');
-          expect(res.body.length).to.be.above(0);
+          expect(res.body.length).to.equal(10);
           res.body.forEach(function(item) {
             expect(item).to.be.a('object');
             expect(item).to.have.all.keys(
@@ -75,19 +97,67 @@ describe('notes', function() {
         });
     });
 
+    /*
+    it('should return correct search results for a valid query', function(){
+        
+      let searchTermTest;
+      return chai.request(app)
+        .get('/api/notes')
+        .then(function(res) {
 
-    it('should return 404 for an invalid id', function() {
+          let targetTitle = res.body[0].title;
+          for (let i=0; i<targetTitle.length; i++)
+          {
+          //let  = targetTitle[i];
+           
+            let firstWord = targetTitle.substr(0, targetTitle.indexOf(' '));
+           
+            searchTermTest = firstWord;
+            console.log(searchTermTest);
+          }
+          console.log(searchTermTest);
+
+
+        //updateData.id = res.body[0].title;
+        return chai.request(app)
+            .get(`/api/notes?searchTerm=${searchTermTest}`);
+        })
+        .then(function(res) {
+          expect(res).to.have.status(200);
+          expect(res).to.be.json;
+          expect(res.body).to.be.a('object');
+          expect(res.body.title).to.include(searchTermTest);
+        });
+    });
+
+*/
+
+    it('should return correct search results for a valid query', function () {
+      return chai.request(app)
+        .get('/api/notes?searchTerm=about%20cats')
+        .then(function (res) {
+          expect(res).to.have.status(200);
+          expect(res).to.be.json;
+          expect(res.body).to.be.a('array');
+          expect(res.body).to.have.length(4);
+          expect(res.body[0]).to.be.an('object');
+        });
+    });
+
+    it('should return an empty array for an incorrect query', function() {
    
       return chai.request(app)
-        .get('/api')
+        .get('/api/notes?searchTerm=sldorf%20dorf')
          
      
         .then(function(res) {
-          expect(res).to.have.status(404);
-          // expect(res).message.to.deep.equal(`Missing 'title' in request body`);
+          
+          expect(res.body).to.be.a('array');
+          expect(res.body.length).to.equal(0);
+          
         
           expect(res).to.be.json;
-          expect(res.body).to.be.a('object');
+          
         
         });
     });
@@ -96,65 +166,41 @@ describe('notes', function() {
 
   describe('GET /api/notes/:id', function(){
     it('should return correct note object with id, title, content for given id', function() {
-    //const newItem = { title: 'coffee', content: 'water seanutbutter' };
-      let testObject;
- 
     
+      let testObject;
+
       return chai.request(app)
-      // first have to get so we have an idea of object to update
+      
         .get('/api/notes')
         .then(function(res){ 
           testObject = res.body[0];
-       
-          
+      
           return chai.request(app)
-            .get(`/api/notes/${testObject.id}`); //api/notes/:id
+            .get(`/api/notes/${testObject.id}`); 
         })
         .then(function(res) {
+          expect(res).to.have.status(200);
+          expect(res).to.be.json;
+          expect(res.body).to.be.an('object');
+          expect(res.body).to.include.keys('id', 'title', 'content');
           expect(res.body.id).to.deep.equal(testObject.id);
           expect(res.body.title).to.deep.equal(testObject.title);
           expect(res.body.content).to.deep.equal(testObject.content);
         });
 
     });
+/*
+    it('should respond with a 404 for an invalid id', function () {
+      return chai.request(app)
+        .get('/api/notes/dorf')
+        //.catch(err => err.response)
+        .then(function(res) {
+          expect(res).to.have.status(404);
+        });
+    });
+    */
   });
-  /*
-    it('should t')
-
-      .then(function(res) {
-        updateData.id = res.body[0].id;
-        return chai.request(app)
-          .put(`/api/notes/${updateData.id}`)
-          .send(updateData);
-      })
-      .then(function(res) {
-        expect(res).to.have.status(200);
-        expect(res).to.be.json;
-        expect(res.body).to.be.a('object');
-        expect(res.body).to.deep.equal(updateData);
-      });
-  });
-*/
-  /*
-  it('should raise error if missing title', function() {
-    const badInputs = 
-      {content: 'water'};
-      //[content: "sand"]
-  
-    return chai
-      .request(app)
-      .post('/api/notes')
-      .send(badInputs)
-      .then(function(res) {
-        expect(res).to.have.status(400);
-   
-      });
-
-  });
-
-*/
-
-
+ 
 
 
   describe('POST /api/notes endpoint', function(){
@@ -197,23 +243,7 @@ describe('notes', function() {
     });
   });
 
-  /*   Is this extraneous??
-  it('should raise error if missing title', function() {
-    const badInputs = 
-      {content: 'water'};
-      //[content: "sand"]
   
-    return chai
-      .request(app)
-      .post('/api/notes')
-      .send(badInputs)
-      .then(function(res) {
-        expect(res).to.have.status(400);
-   
-      });
-
-  });
-*/
 
   describe('PUT /api/notes/:id endpoint', function(){
     it('should update items on PUT', function() {
@@ -285,5 +315,30 @@ describe('notes', function() {
     });
 
   });
+
+
+
+  describe('DELETE /api/notes/:id endpoint', function(){
+
+    let testObjects;
+
+    it('should delete an item by id', function(){
+      return chai.request(app)
+      // first have to get so we have an idea of object to update
+        .get('/api/notes')
+        .then(function(res){ 
+          testObjects = res.body;
+       
+          
+          return chai.request(app)
+            .delete(`/api/notes/${testObjects[0].id}`); //api/notes/:id
+        })
+        .then(function(res) {
+          expect(res).to.have.status(204);
+        });
+
+    });
+  });
+
 });
 

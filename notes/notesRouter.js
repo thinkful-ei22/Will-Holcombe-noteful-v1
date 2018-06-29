@@ -114,6 +114,7 @@ router.post('/notes', (req, res, next) => {
   */
 router.get('/notes', (req, res, next) => {
   const { searchTerm } = req.query;
+  console.log(searchTerm);
   notes.filter(searchTerm)
     .then(list => {
       res.json(list);
