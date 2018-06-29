@@ -2,12 +2,25 @@
 
 const chai = require('chai');
 
-const app = require('../server');
+const { app, runServer, closeServer } = require("../server");
 const chaiHttp = require('chai-http');
 const expect = chai.expect;
 
 chai.use(chaiHttp);
 describe('notes', function() {
+
+  before(function() {
+    return runServer();
+  });
+
+  // although we only have one test module at the moment, we'll
+  // close our server at the end of these tests. Otherwise,
+  // if we add another test module that also has a `before` block
+  // that starts our server, it will cause an error because the
+  // server would still be running from the previous tests.
+  after(function() {
+    return closeServer();
+  });
 
   // `chai.request.get` is an asynchronous operation. When
   // using Mocha with async operations, we need to either
